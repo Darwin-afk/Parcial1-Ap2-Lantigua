@@ -7,7 +7,22 @@
 
 <h3>Consultas de Articulos</h3>
 
-<div class="row">
+<div class="row justify-content-center">
+    <div class="col-3">
+        <label>Filtro</label>
+        <select @bind="Filtro" class="form-control">
+            <option value="0">Todo</option>
+            <option value="1">ArticuloId</option>
+            <option value="2">Descripción</option>
+            <option value="3">Existencia</option>
+            <option value="4">Costo</option>
+            <option value="5">Valor Inventario</option>
+        </select>
+    </div>
+    <div class="col-3">
+        <label>Criterio</label>
+        <input type="text" @bind="Criterio" class="form-control"/>
+    </div>
     <button type="button" class="btn btn-lg btn-primary" @onclick="Consultar"><i class="oi oi-magnifying-glass" />Consultar</button>
 </div>
 
@@ -35,8 +50,16 @@
     </tbody>
 </table>
 
+<label class="col-2 offset-8">Monto Total: @MontoTotal</label>
+
 @code {
     public List<Articulos> ListaArticulos { get; set; }
+
+    public string Filtro { get; set; }
+
+    public string Criterio { get; set; }
+
+    public decimal MontoTotal { get; set; }
 
     protected override void OnInitialized()
     {
@@ -46,10 +69,103 @@
     private void Nuevo()
     {
         ListaArticulos = new List<Articulos>();
+        Filtro = "0";
+        Criterio = string.Empty;
     }
 
     public void Consultar()
     {
-        ListaArticulos = ArticulosBLL.GetList(a => true);
+        switch (Filtro)
+        {
+            case "0": //Todo
+                ListaArticulos = ArticulosBLL.GetList(a => true);
+                break;
+            case "1": //ArticuloId
+                if(Criterio.Trim().Length > 0)
+                {
+                    try
+                    {
+                        int id = Convert.ToInt32(Criterio);
+                        ListaArticulos = ArticulosBLL.GetList(a => a.ArticuloId == id);
+                    }
+                    catch (FormatException)
+                    {
+                        toast.ShowWarning("Ingrese un numero");
+                    }
+                }
+                else
+                {
+                    ListaArticulos = ArticulosBLL.GetList(a => true).OrderBy(a => a.ArticuloId).ToList();
+                }
+                break;
+            case "2": //Descripcion
+                ListaArticulos = ArticulosBLL.GetList(a => a.Descripcion.Contains(Criterio));
+                break;
+            case "3": //Existencia
+                if(Criterio.Trim().Length > 0)
+                {
+                    try
+                    {
+                        int existencia = Convert.ToInt32(Criterio);
+                        ListaArticulos = ArticulosBLL.GetList(a => a.Existencia == existencia);
+                    }
+                    catch (FormatException)
+                    {
+                        toast.ShowWarning("Ingrese un numero");
+                    }
+                }
+                else
+                {
+                    ListaArticulos = ArticulosBLL.GetList(a => true).OrderBy(a => a.Existencia).ToList();
+                }
+                break;
+            case "4": //Costo
+                if(Criterio.Trim().Length > 0)
+                {
+                    try
+                    {
+                        decimal costo = Convert.ToInt32(Criterio);
+                        ListaArticulos = ArticulosBLL.GetList(a => a.Costo == costo);
+                    }
+                    catch (FormatException)
+                    {
+                        toast.ShowWarning("Ingrese un numero");
+                    }
+                }
+                else
+                {
+                    ListaArticulos = ArticulosBLL.GetList(a => true).OrderBy(a => a.Costo).ToList();
+                }
+                break;
+            case "5": //Valor Inventario
+                if(Criterio.Trim().Length > 0)
+                {
+                    try
+                    {
+                        decimal valorInventario = Convert.ToInt32(Criterio);
+                        ListaArticulos = ArticulosBLL.GetList(a => a.ValorInventario == valorInventario);
+                    }
+                    catch (FormatException)
+                    {
+                        toast.ShowWarning("Ingrese un numero");
+                    }
+                }
+                else
+                {
+                    ListaArticulos = ArticulosBLL.GetList(a => true).OrderBy(a => a.ValorInventario).ToList();
+                }
+                break;
+        }
+        CalcularTotal();
+    }
+
+    private void CalcularTotal()
+    {
+        MontoTotal = 0;
+
+        foreach(var articulo in ListaArticulos)
+        {
+            MontoTotal += articulo.ValorInventario;
+        }
     }
 }
