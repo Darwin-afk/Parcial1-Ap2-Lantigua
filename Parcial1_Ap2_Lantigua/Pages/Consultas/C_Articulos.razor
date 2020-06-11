@@ -1,0 +1,55 @@
+﻿@page "/ConsultarArticulos"
+
+@using Models
+@using BLL
+
+@inject IToastService toast
+
+<h3>Consultas de Articulos</h3>
+
+<div class="row">
+    <button type="button" class="btn btn-lg btn-primary" @onclick="Consultar"><i class="oi oi-magnifying-glass" />Consultar</button>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ArticuloId</th>
+            <th>Descripción</th>
+            <th>Existencia</th>
+            <th>Costo</th>
+            <th>Valor Inventario</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var articulo in ListaArticulos)
+        {
+            <tr>
+                <td>@articulo.ArticuloId</td>
+                <td>@articulo.Descripcion</td>
+                <td>@articulo.Existencia</td>
+                <td>@articulo.Costo</td>
+                <td>@articulo.ValorInventario</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    public List<Articulos> ListaArticulos { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Nuevo();
+    }
+
+    private void Nuevo()
+    {
+        ListaArticulos = new List<Articulos>();
+    }
+
+    public void Consultar()
+    {
+        ListaArticulos = ArticulosBLL.GetList(a => true);
+    }
+}
